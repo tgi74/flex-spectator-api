@@ -79,12 +79,16 @@ namespace FlexSpectatorApi
         public async Task StartAsync(int client)
         {
             Log($"Starting client #{client}");
-            clients.TryAdd(client, new OsuSpectatorConnection(client));
-            // seems to be osu!.exe -spectateclient {id} {teamsize}
-            await Task.Run(() => Process.Start(OsuPath, $"-spectateclient {client} {TeamSize}")).ConfigureAwait(false);
+            var conn = new OsuSpectatorConnection(client);
+            clients.TryAdd(client, conn);
             clients[client].OnConnect += UpdatePresence;
             clients[client].OnDisconnect += UpdatePresence;
             clients[client].Start();
+
+            // We don't start a client if we can connect to an existing one
+            if (!conn.Connect())
+                // osu!.exe -spectateclient {id} {teamsize}
+                await Task.Run(() => Process.Start(OsuPath, $"-spectateclient {client} {TeamSize}")).ConfigureAwait(false);
         }
 
         public async Task RestartAsync(int client)

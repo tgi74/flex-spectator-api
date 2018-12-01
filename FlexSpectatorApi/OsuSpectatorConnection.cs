@@ -113,6 +113,8 @@ namespace FlexSpectatorApi
         /// <returns>true if this connection was successful, false otherwise</returns>
         public bool Connect()
         {
+            if (IsConnected)
+                return true;
             try
             {
                 var ipc = (InterProcessOsu)Activator.GetObject(typeof(InterProcessOsu), $"ipc://{channel}/loader");
